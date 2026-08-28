@@ -1,0 +1,34 @@
+{
+  "feature_columns": [
+    "packet_count",
+    "fwd_packet_count",
+    "bwd_packet_count",
+    "total_bytes",
+    "fwd_bytes",
+    "bwd_bytes",
+    "flow_duration",
+    "packets_per_sec",
+    "bytes_per_sec",
+    "bwd_packets_per_sec",
+    "mean_packet_size",
+    "std_packet_size",
+    "iat_mean",
+    "iat_std",
+    "syn_count",
+    "syn_ack_count",
+    "ack_count",
+    "fin_count",
+    "rst_count",
+    "syn_ratio",
+    "ack_ratio",
+    "syn_ack_ratio",
+    "fwd_bwd_ratio",
+    "byte_rate"
+  ],
+  "class_labels": {
+    "0": "Normal",
+    "1": "SYN_Flood",
+    "2": "Port_Scan",
+    "3": "UDP_Flood"
+  }
+}

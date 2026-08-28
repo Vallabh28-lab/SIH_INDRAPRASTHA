@@ -1,0 +1,59 @@
+[
+  {
+    "incident_id": "INC-1787946832390-1",
+    "threat_type": "SYN_Flood",
+    "src_ip": "10.0.88.5",
+    "dst_ip": "192.168.10.20",
+    "first_seen_utc": "2026-08-28T19:53:52.390275+00:00",
+    "last_seen_utc": "2026-08-28T19:53:55.521492+00:00",
+    "occurrence_count": 2,
+    "target_ports": [
+      80
+    ],
+    "total_packets": 570,
+    "total_bytes": 34048,
+    "max_anomaly_score": 0.5041,
+    "avg_confidence": 1.0,
+    "protocol": "TCP"
+  },
+  {
+    "incident_id": "INC-1787946838642-2",
+    "threat_type": "Port_Scan",
+    "src_ip": "172.16.8.99",
+    "dst_ip": "192.168.10.20",
+    "first_seen_utc": "2026-08-28T19:53:58.642684+00:00",
+    "last_seen_utc": "2026-08-28T19:53:59.358887+00:00",
+    "occurrence_count": 7,
+    "target_ports": [
+      21,
+      22,
+      23,
+      25,
+      80,
+      443,
+      3389
+    ],
+    "total_packets": 11,
+    "total_bytes": 636,
+    "max_anomaly_score": 0.4913,
+    "avg_confidence": 1.0,
+    "protocol": "TCP"
+  },
+  {
+    "incident_id": "INC-1787946842508-3",
+    "threat_type": "UDP_Flood",
+    "src_ip": "192.168.10.20",
+    "dst_ip": "198.51.100.33",
+    "first_seen_utc": "2026-08-28T19:54:02.508239+00:00",
+    "last_seen_utc": "2026-08-28T19:54:02.508239+00:00",
+    "occurrence_count": 1,
+    "target_ports": [
+      44550
+    ],
+    "total_packets": 283,
+    "total_bytes": 297813,
+    "max_anomaly_score": 0.4716,
+    "avg_confidence": 1.0,
+    "protocol": "UDP"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "feature_columns": [
+    "packet_count",
+    "total_bytes",
+    "flow_duration",
+    "packets_per_sec",
+    "bytes_per_sec",
+    "mean_packet_size",
+    "std_packet_size",
+    "iat_mean",
+    "iat_std",
+    "syn_count",
+    "ack_count"
+  ],
+  "class_labels": {
+    "0": "Normal",
+    "1": "SYN_Flood",
+    "2": "Port_Scan",
+    "3": "UDP_Flood"
+  }
+}

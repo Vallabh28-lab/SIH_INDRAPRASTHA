@@ -1,0 +1,50 @@
+services:
+  source-node-1:
+    build:
+      context: ../traffic-simulator
+      dockerfile: Dockerfile
+    container_name: source-node-1
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../traffic-simulator:/app
+    networks:
+      cyber_lab_net:
+        ipv4_address: 192.168.10.10
+    restart: unless-stopped
+
+  source-node-2:
+    build:
+      context: ../traffic-simulator
+      dockerfile: Dockerfile
+    container_name: source-node-2
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../traffic-simulator:/app
+    networks:
+      cyber_lab_net:
+        ipv4_address: 192.168.10.11
+    restart: unless-stopped
+
+  destination-node:
+    build:
+      context: ../traffic-simulator
+      dockerfile: Dockerfile
+    container_name: destination-node
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../traffic-simulator:/app
+    networks:
+      cyber_lab_net:
+        ipv4_address: 192.168.10.20
+    restart: unless-stopped
+
+networks:
+  cyber_lab_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.10.0/24
