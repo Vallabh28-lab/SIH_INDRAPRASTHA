@@ -1,0 +1,26 @@
+[
+  {
+    "audit_id": "AUD-50CF27855C69",
+    "timestamp": "2026-08-29T09:08:10.291183+00:00",
+    "prediction": "SYN_Flood",
+    "confidence": 0.98,
+    "anomaly_score": 0.85,
+    "source_ip": "10.0.4.88",
+    "destination_ip": "192.168.10.20",
+    "payload_sha256": "06cc5bc7bc270ffda4dd76160d25f5c711375d9aae8ffb1dacb7de9496e42590",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "audit_hash": "9d013edb59bb42268a6a2ec71eee6c05651b4d8a710087bb73239055bbcdc890",
+    "verified": true,
+    "blockchain_status": "READY_FOR_HYPERLEDGER_ANCHOR",
+    "xai_reasons": [
+      "\u2713 High SYN flag concentration",
+      "\u2713 High packet rate"
+    ],
+    "threat_intel": {},
+    "raw_payload": {
+      "source_ip": "10.0.4.88",
+      "packet_count": 500,
+      "protocol": "TCP"
+    }
+  }
+]

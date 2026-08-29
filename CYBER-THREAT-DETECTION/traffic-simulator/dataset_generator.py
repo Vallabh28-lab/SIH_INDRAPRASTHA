@@ -442,6 +442,70 @@ class DatasetGenerator:
         logger.info("Dataset generated: Total=%d | Train=%d | Test=%d", len(df), len(train_df), len(test_df))
         return train_df, test_df
 
+    def build_dataset(
+        self,
+        samples_per_class: int = 200,
+        output_path: Optional[str] = None,
+    ) -> pd.DataFrame:
+        """
+        Synthesize multi-class flow dataset and return combined DataFrame.
+        Optionally persists to output_path CSV.
+        """
+        all_flows: List[Dict[str, Any]] = []
+        base_time = 1700000000.0
+
+        for i in range(samples_per_class):
+            src_ip = f"192.168.10.{random.randint(10, 50)}"
+            dst_ip = "192.168.10.20"
+            src_port = random.randint(30000, 65000)
+            dst_port = random.choice([80, 443, 8080, 8443, 3000, 5000])
+            pkts = self._generate_normal_packets(src_ip, dst_ip, src_port, dst_port, base_time + i * 15)
+            for f in FlowAggregator(raw_packets=pkts, bidirectional=True).aggregate():
+                f["label"] = 0
+                f["label_name"] = "Normal"
+                all_flows.append(f)
+
+        for i in range(samples_per_class):
+            src_ip = f"10.0.{random.randint(1, 254)}.{random.randint(1, 254)}"
+            dst_ip = "192.168.10.20"
+            src_port = random.randint(1024, 65535)
+            dst_port = random.choice([80, 443, 22, 8080])
+            pkts = self._generate_syn_flood_packets(src_ip, dst_ip, src_port, dst_port, base_time + i * 15)
+            for f in FlowAggregator(raw_packets=pkts, bidirectional=True).aggregate():
+                f["label"] = 1
+                f["label_name"] = "SYN_Flood"
+                all_flows.append(f)
+
+        for i in range(samples_per_class):
+            src_ip = f"172.16.{random.randint(1, 10)}.{random.randint(1, 254)}"
+            dst_ip = "192.168.10.20"
+            src_port = random.randint(40000, 60000)
+            start_p = random.randint(20, 100)
+            target_ports = list(range(start_p, start_p + random.randint(1, 4)))
+            pkts = self._generate_port_scan_packets(src_ip, dst_ip, src_port, target_ports, base_time + i * 15)
+            for f in FlowAggregator(raw_packets=pkts, bidirectional=True).aggregate():
+                f["label"] = 2
+                f["label_name"] = "Port_Scan"
+                all_flows.append(f)
+
+        for i in range(samples_per_class):
+            src_ip = f"198.51.100.{random.randint(1, 254)}"
+            dst_ip = "192.168.10.20"
+            src_port = random.randint(1024, 65535)
+            dst_port = random.choice([53, 123, 5060, 9999, 37008])
+            pkts = self._generate_udp_flood_packets(src_ip, dst_ip, src_port, dst_port, base_time + i * 15)
+            for f in FlowAggregator(raw_packets=pkts, bidirectional=True).aggregate():
+                f["label"] = 3
+                f["label_name"] = "UDP_Flood"
+                all_flows.append(f)
+
+        df = pd.DataFrame(all_flows).sample(frac=1.0, random_state=self.random_seed).reset_index(drop=True)
+        if output_path:
+            os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+            df.to_csv(output_path, index=False)
+            logger.info("Saved synthesized dataset to: %s", output_path)
+        return df
+
     def generate_ood_dataset(self, num_samples: int = 40) -> pd.DataFrame:
         """Generate Out-of-Distribution (OOD) novel zero-day attack flows for unsupervised validation."""
         ood_flows = []

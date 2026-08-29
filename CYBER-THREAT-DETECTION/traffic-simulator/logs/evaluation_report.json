@@ -1,0 +1,67 @@
+{
+  "evaluation_timestamp": "2026-08-29T09:35:28.357943+00:00",
+  "total_evaluated_flows": 500,
+  "metrics": {
+    "overall_accuracy": 1.0,
+    "weighted_precision": 1.0,
+    "weighted_recall": 1.0,
+    "weighted_f1_score": 1.0,
+    "false_positive_rate": 0.0
+  },
+  "confusion_matrix": {
+    "true_negatives": 100,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 400
+  },
+  "performance_latency": {
+    "mean_latency_ms": 86.031,
+    "p95_latency_ms": 107.154,
+    "p99_latency_ms": 121.713,
+    "throughput_flows_per_sec": 11.6
+  },
+  "forensic_audit": {
+    "audit_records_logged": 400,
+    "chain_status": "VALID",
+    "corrupted_count": 0
+  },
+  "classification_report": {
+    "Normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "Port_Scan": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "SYN_Flood": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 200.0
+    },
+    "UDP_Flood": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 500.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 500.0
+    }
+  }
+}

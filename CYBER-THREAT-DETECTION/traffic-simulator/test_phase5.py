@@ -180,7 +180,12 @@ def main() -> None:
         inference = engine.predict_flow(test["flow"])
         status_tag = "[ALERT: THREAT DETECTED]" if inference["is_malicious"] else "[STATUS: BENIGN / NORMAL]"
         print(f"\n>> Test Case: {test['name']}")
-        print(f"   5-Tuple           : {inference['src_ip']}:{inference['src_port']} -> {inference['dst_ip']}:{inference['dst_port']} ({inference['protocol']})")
+        src_ip = inference.get("source_ip", inference.get("src_ip", "127.0.0.1"))
+        dst_ip = inference.get("destination_ip", inference.get("dst_ip", "127.0.0.1"))
+        src_port = inference.get("source_port", inference.get("src_port", 0))
+        dst_port = inference.get("destination_port", inference.get("dst_port", 0))
+        protocol = inference.get("protocol", "TCP")
+        print(f"   5-Tuple           : {src_ip}:{src_port} -> {dst_ip}:{dst_port} ({protocol})")
         print(f"   Class Prediction  : {inference['prediction']} (Confidence: {inference['confidence']*100:.1f}%)")
         print(f"   Anomaly Score     : {inference['anomaly_score']:.4f} (Threshold: 0.65)")
         print(f"   Security Verdict  : {status_tag}")
