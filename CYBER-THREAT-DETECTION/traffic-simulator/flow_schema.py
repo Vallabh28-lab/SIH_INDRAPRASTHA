@@ -56,6 +56,28 @@ class FlowRecordSchema(BaseModel):
         examples=["TCP"],
     )
 
+    # --- Optional Layer 7 (Application) HTTP Request Fields ---
+    http_method: Optional[str] = Field(
+        default=None,
+        description="Optional HTTP method string (e.g., 'GET', 'POST', 'PUT')",
+        examples=["GET"],
+    )
+    uri_path: Optional[str] = Field(
+        default=None,
+        description="Optional request URI/path (may include query string)",
+        examples=["/api/v1/search?q=test"],
+    )
+    request_headers: Optional[dict] = Field(
+        default=None,
+        description="Optional request headers as a simple dictionary",
+        examples=[{"User-Agent": "curl/7.68.0"}],
+    )
+    body_payload: Optional[str] = Field(
+        default=None,
+        description="Optional raw request body/payload as text or JSON string",
+        examples=["{\"query\": \"test\"}"],
+    )
+
     # --- Volumetric & Throughput Features ---
     packet_count: int = Field(
         ...,
@@ -290,6 +312,10 @@ class FlowRecordSchema(BaseModel):
                 "source_port": 54321,
                 "destination_port": 80,
                 "protocol": "TCP",
+                "http_method": "GET",
+                "uri_path": "/api/v1/search?q=test",
+                "request_headers": {"User-Agent": "curl/7.68.0"},
+                "body_payload": None,
                 "packet_count": 100,
                 "total_bytes": 38400,
                 "packets_per_second": 33.88,
