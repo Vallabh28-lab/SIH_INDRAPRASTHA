@@ -1,50 +1,151 @@
+# ==============================================================================================
+# NTRO AI-Based Cyber Threat Detection Platform - Phase 1 Sandbox Environment
+# Production-Ready Docker Compose Architecture for Controlled Network Telemetry & Virtualization
+# ==============================================================================================
+#
+# ARCHITECTURAL HIGHLIGHTS:
+# 1. Custom Isolated Bridge Network: Subnet 192.168.10.0/24 with 'internal: true' flag.
+#    - 'internal: true' prohibits Docker daemon from creating outbound NAT iptables MASQUERADE rules.
+#    - Completely guarantees zero packet leakage to external LAN/WAN or host machine interfaces.
+# 2. Kernel Capabilities (cap_add):
+#    - NET_ADMIN: Grants full capability to manipulate routing tables, loopback aliases (lo:0), and iptables.
+#    - NET_RAW: Enables raw socket packet creation (Layer 2/3/4 Scapy injection) and promiscuous sniffing.
+# 3. Kernel Sysctls:
+#    - net.ipv4.ip_forward=0: Prevents nodes from routing unsolicited traffic outside their boundary.
+#    - net.ipv4.conf.*.rp_filter=0: Disables strict Reverse Path Filtering, enabling asymmetric routing
+#      and custom spoofed source IP telemetry injection without kernel-level drops.
+#    - net.ipv4.conf.all.accept_local=1: Enables collector nodes to process packets addressed to local loopback aliases.
+# ==============================================================================================
+
 services:
-  source-node-1:
+  # --------------------------------------------------------------------------------------------
+  # Traffic Generator Node (Primary Generator / source-node-1)
+  # Designated for high-throughput synthetic flow generation, port scanning, and adversarial attack vectors.
+  # --------------------------------------------------------------------------------------------
+  generator-node:
     build:
       context: ../traffic-simulator
       dockerfile: Dockerfile
-    container_name: source-node-1
+    container_name: generator-node
+    hostname: generator-node
     cap_add:
       - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      net.ipv4.ip_forward: 0
+      net.ipv4.conf.all.rp_filter: 0
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.eth0.rp_filter: 0
     volumes:
       - ../traffic-simulator:/app
+    working_dir: /app
     networks:
       cyber_lab_net:
         ipv4_address: 192.168.10.10
+        aliases:
+          - source-node-1
+          - traffic-gen-1
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     restart: unless-stopped
+    command: [ "tail", "-f", "/dev/null" ]
 
-  source-node-2:
+  # --------------------------------------------------------------------------------------------
+  # Auxiliary Generator Node (Secondary Generator / source-node-2)
+  # Designated for distributed multi-source attack simulation (e.g., Botnet DDoS, multi-vector floods).
+  # --------------------------------------------------------------------------------------------
+  generator-node-2:
     build:
       context: ../traffic-simulator
       dockerfile: Dockerfile
-    container_name: source-node-2
+    container_name: generator-node-2
+    hostname: generator-node-2
     cap_add:
       - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      net.ipv4.ip_forward: 0
+      net.ipv4.conf.all.rp_filter: 0
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.eth0.rp_filter: 0
     volumes:
       - ../traffic-simulator:/app
+    working_dir: /app
     networks:
       cyber_lab_net:
         ipv4_address: 192.168.10.11
+        aliases:
+          - source-node-2
+          - traffic-gen-2
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     restart: unless-stopped
+    command: [ "tail", "-f", "/dev/null" ]
 
-  destination-node:
+  # --------------------------------------------------------------------------------------------
+  # Telemetry Collector & Detection Node (collector-node / destination-node)
+  # Designated for raw packet capture, 5-tuple flow aggregation, AI detection daemon & forensic logging.
+  # --------------------------------------------------------------------------------------------
+  collector-node:
     build:
       context: ../traffic-simulator
       dockerfile: Dockerfile
-    container_name: destination-node
+    container_name: collector-node
+    hostname: collector-node
     cap_add:
       - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      net.ipv4.ip_forward: 0
+      net.ipv4.conf.all.rp_filter: 0
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.eth0.rp_filter: 0
+      net.ipv4.conf.all.accept_local: 1
     volumes:
       - ../traffic-simulator:/app
+    working_dir: /app
     networks:
       cyber_lab_net:
         ipv4_address: 192.168.10.20
+        aliases:
+          - destination-node
+          - telemetry-sink
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4096M
+        reservations:
+          cpus: '1.0'
+          memory: 1024M
     restart: unless-stopped
+    command: [ "tail", "-f", "/dev/null" ]
 
+# ==============================================================================================
+# Isolated Bridge Network Definition
+# ==============================================================================================
 networks:
   cyber_lab_net:
     driver: bridge
+    internal: true # CRITICAL: Strict isolation - blocks external WAN/LAN routing and prevents host leakage
+    driver_opts:
+      com.docker.network.bridge.name: "br-cyber-sbx"
+      com.docker.network.bridge.enable_icc: "true" # Allow Inter-Container Communication within subnet
+      com.docker.network.bridge.enable_ip_masquerade: "false" # Explicitly disable NAT masquerading
     ipam:
       driver: default
       config:
         - subnet: 192.168.10.0/24
+          gateway: 192.168.10.1

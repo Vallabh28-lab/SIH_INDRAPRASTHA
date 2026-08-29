@@ -538,8 +538,9 @@ class ThreatDetectionEngine:
             results.append(pred)
 
         scores = [r["anomaly_score"] for r in results]
-        anomalies_flagged = sum(1 for s in scores if s >= threshold or r["is_malicious"])
+        anomalies_flagged = sum(1 for r in results if r["anomaly_score"] >= threshold or r["is_malicious"])
         total = len(scores)
+
         detection_rate = (anomalies_flagged / total) if total > 0 else 0.0
 
         metrics = {

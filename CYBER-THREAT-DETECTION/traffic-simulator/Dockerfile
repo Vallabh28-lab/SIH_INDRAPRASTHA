@@ -6,10 +6,14 @@ ENV PYTHONUNBUFFERED=1
 
 # Install essential network diagnostic tools and build dependencies for Scapy / libpcap
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    iproute2 \
+    iptables \
     net-tools \
     iputils-ping \
     tcpdump \
     libpcap-dev \
+    procps \
+    curl \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 

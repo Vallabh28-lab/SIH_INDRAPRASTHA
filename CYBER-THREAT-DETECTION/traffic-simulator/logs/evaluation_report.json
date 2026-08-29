@@ -1,5 +1,5 @@
 {
-  "evaluation_timestamp": "2026-08-29T10:08:29.445546+00:00",
+  "evaluation_timestamp": "2026-08-29T18:31:00.483906+00:00",
   "total_evaluated_flows": 600,
   "scenario_count": 6,
   "metrics": {
@@ -16,10 +16,10 @@
     "true_positives": 400
   },
   "performance_latency": {
-    "mean_latency_ms": 17.007,
-    "p95_latency_ms": 22.792,
-    "p99_latency_ms": 28.719,
-    "throughput_flows_per_sec": 57.9
+    "mean_latency_ms": 19.085,
+    "p95_latency_ms": 21.424,
+    "p99_latency_ms": 26.261,
+    "throughput_flows_per_sec": 51.7
   },
   "scenario_accuracy": {
     "Normal_TCP_Web": "100.0% (100/100)",

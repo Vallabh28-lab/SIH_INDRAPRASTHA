@@ -1,28 +1,49 @@
 [
   {
-    "incident_id": "INC-1787946832390-1",
+    "incident_id": "INC-1788027367788-1",
     "threat_type": "SYN_Flood",
     "src_ip": "10.0.88.5",
     "dst_ip": "192.168.10.20",
-    "first_seen_utc": "2026-08-28T19:53:52.390275+00:00",
-    "last_seen_utc": "2026-08-28T19:53:55.521492+00:00",
+    "first_seen_utc": "2026-08-29T18:16:07.788655+00:00",
+    "last_seen_utc": "2026-08-29T18:16:10.812058+00:00",
     "occurrence_count": 2,
     "target_ports": [
       80
     ],
     "total_packets": 570,
     "total_bytes": 34048,
-    "max_anomaly_score": 0.5041,
-    "avg_confidence": 1.0,
-    "protocol": "TCP"
+    "max_anomaly_score": 0.85,
+    "avg_confidence": 0.9974,
+    "protocol": "TCP",
+    "sample_flow_metrics": {
+      "packets_per_sec": 502.06,
+      "bytes_per_sec": 29994.28,
+      "flow_duration": 0.557706,
+      "syn_ratio": 1.0,
+      "syn_ack_ratio": 280.0,
+      "fwd_bwd_ratio": 280.0
+    },
+    "xai_top_features": [
+      "syn_count = 289 (+4.08 influence)",
+      "packet_count = 290 (+0.00 influence)",
+      "total_bytes = 17320 (+0.00 influence)"
+    ],
+    "xai_feature_attributions": {
+      "syn_count": 4.0803,
+      "packet_count": 0.0,
+      "total_bytes": 0.0,
+      "flow_duration": 0.0,
+      "packets_per_sec": 0.0,
+      "bytes_per_sec": 0.0
+    }
   },
   {
-    "incident_id": "INC-1787946838642-2",
+    "incident_id": "INC-1788027373831-2",
     "threat_type": "Port_Scan",
     "src_ip": "172.16.8.99",
     "dst_ip": "192.168.10.20",
-    "first_seen_utc": "2026-08-28T19:53:58.642684+00:00",
-    "last_seen_utc": "2026-08-28T19:53:59.358887+00:00",
+    "first_seen_utc": "2026-08-29T18:16:13.831611+00:00",
+    "last_seen_utc": "2026-08-29T18:16:13.942153+00:00",
     "occurrence_count": 7,
     "target_ports": [
       21,
@@ -35,25 +56,67 @@
     ],
     "total_packets": 11,
     "total_bytes": 636,
-    "max_anomaly_score": 0.4913,
-    "avg_confidence": 1.0,
-    "protocol": "TCP"
+    "max_anomaly_score": 0.5043,
+    "avg_confidence": 0.9988,
+    "protocol": "TCP",
+    "sample_flow_metrics": {
+      "packets_per_sec": 10000.0,
+      "bytes_per_sec": 600000.0,
+      "flow_duration": 0.0,
+      "syn_ratio": 1.0,
+      "syn_ack_ratio": 1.0,
+      "fwd_bwd_ratio": 1.0
+    },
+    "xai_top_features": [
+      "packet_count = 2 (+3.85 influence)",
+      "total_bytes = 114 (+0.00 influence)",
+      "flow_duration = 0.0045 (+0.00 influence)"
+    ],
+    "xai_feature_attributions": {
+      "packet_count": 3.8491,
+      "total_bytes": 0.0,
+      "flow_duration": 0.0,
+      "packets_per_sec": 0.0,
+      "bytes_per_sec": 0.0,
+      "mean_packet_size": 0.0
+    }
   },
   {
-    "incident_id": "INC-1787946842508-3",
+    "incident_id": "INC-1788027376969-3",
     "threat_type": "UDP_Flood",
     "src_ip": "192.168.10.20",
     "dst_ip": "198.51.100.33",
-    "first_seen_utc": "2026-08-28T19:54:02.508239+00:00",
-    "last_seen_utc": "2026-08-28T19:54:02.508239+00:00",
+    "first_seen_utc": "2026-08-29T18:16:16.969437+00:00",
+    "last_seen_utc": "2026-08-29T18:16:16.969437+00:00",
     "occurrence_count": 1,
     "target_ports": [
       44550
     ],
     "total_packets": 283,
     "total_bytes": 297813,
-    "max_anomaly_score": 0.4716,
-    "avg_confidence": 1.0,
-    "protocol": "UDP"
+    "max_anomaly_score": 0.8,
+    "avg_confidence": 0.9974,
+    "protocol": "UDP",
+    "sample_flow_metrics": {
+      "packets_per_sec": 287.28,
+      "bytes_per_sec": 302320.08,
+      "flow_duration": 0.985092,
+      "syn_ratio": 0.0,
+      "syn_ack_ratio": 0.0,
+      "fwd_bwd_ratio": 0.0
+    },
+    "xai_top_features": [
+      "syn_count = 0 (+4.08 influence)",
+      "packet_count = 283 (+0.00 influence)",
+      "total_bytes = 297813 (+0.00 influence)"
+    ],
+    "xai_feature_attributions": {
+      "syn_count": 4.0803,
+      "packet_count": 0.0,
+      "total_bytes": 0.0,
+      "flow_duration": 0.0,
+      "packets_per_sec": 0.0,
+      "bytes_per_sec": 0.0
+    }
   }
 ]

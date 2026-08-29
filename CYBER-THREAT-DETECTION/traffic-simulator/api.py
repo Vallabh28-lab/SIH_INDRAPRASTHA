@@ -9,10 +9,14 @@ Description: Asynchronous FastAPI Control Gateway with real-time telemetry inges
 """
 
 from datetime import datetime, timezone
+import json
 import logging
+import os
 import sys
+import threading
 import uuid
 from typing import Any, Dict, List, Optional
+
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +40,12 @@ from traffic_profiles import (
     generate_port_sweep,
 )
 from xai_explainer import ThreatExplainer
+from http_input_parser import parse_http_input, parse_http_target_details
+from dns_resolver import resolve_domain, resolve_domain_details
+from behavioral_flow_aggregator import generate_behavioral_flow
+
+
+
 
 # Configure logger
 logging.basicConfig(
@@ -82,6 +92,20 @@ except Exception as exc:
 
 intel_service = ThreatIntelService()
 audit_manager = ForensicAuditManager("logs/audit_trail.json")
+FLOWS_LOG_FILE = "logs/flows.jsonl"
+flows_file_lock = threading.Lock()
+os.makedirs(os.path.dirname(os.path.abspath(FLOWS_LOG_FILE)), exist_ok=True)
+
+
+def _append_to_flows_store(record: Dict[str, Any]) -> None:
+    """Thread-safe append of validated flow telemetry to local operational filestore."""
+    try:
+        with flows_file_lock:
+            with open(FLOWS_LOG_FILE, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record) + "\n")
+    except Exception as err:
+        logger.error("Failed writing flow record to %s: %s", FLOWS_LOG_FILE, err)
+
 
 
 def _execute_custom_traffic_job(job_id: str, config: TrafficConfigSchema) -> None:
@@ -262,9 +286,12 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
         if len(traffic_history) > MAX_HISTORY_SIZE:
             traffic_history.pop()
 
+        # Atomically append validated flow record to local operational filestore (logs/flows.jsonl)
+        _append_to_flows_store(soc_event)
+
         return {
             "status": "success",
-            "message": "Flow record processed and audited successfully",
+            "message": "Flow record processed, persisted to flows.jsonl, and audited successfully",
             "prediction": prediction_label,
             "confidence": confidence,
             "anomaly_score": anomaly_score,
@@ -276,6 +303,7 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
             "received_flow": flow_data,
             "timestamp": now_iso,
         }
+
 
     except Exception as e:
         logger.error("[ERROR] Failed to process flow telemetry: %s", str(e), exc_info=True)
@@ -595,5 +623,60 @@ def list_jobs():
     ]
 
 
+@app.post("/api/parse-target", status_code=status.HTTP_200_OK, tags=["Input Parser"])
+def parse_target_endpoint(payload: Dict[str, Any]):
+    """
+    Accepts target URL, bare domain, or raw HTTP request line,
+    and returns parsed host/domain details using http_input_parser.
+    """
+    raw_input = payload.get("input") or payload.get("raw_input") or payload.get("target") or ""
+    if not raw_input:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Payload must include 'input', 'raw_input', or 'target' field."
+        )
+    return parse_http_target_details(raw_input)
+
+
+@app.post("/api/resolve-dns", status_code=status.HTTP_200_OK, tags=["DNS Resolution"])
+def resolve_dns_endpoint(payload: Dict[str, Any]):
+    """
+    Accepts domain, URL, or host string and converts to IPv4 with socket.gaierror fallback.
+    """
+    domain = payload.get("domain") or payload.get("host") or payload.get("target") or payload.get("input") or ""
+    default_ip = payload.get("default_ip", "192.168.10.1")
+    if not domain:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Payload must include 'domain', 'host', or 'target' field."
+        )
+    return resolve_domain_details(domain, default_ip=default_ip)
+
+
+@app.post("/api/generate-flow", status_code=status.HTTP_200_OK, tags=["Behavioral Flow Aggregator"])
+def generate_behavioral_flow_endpoint(payload: Dict[str, Any]):
+    """
+    Synthesizes a Pydantic-compliant flow record from target request context,
+    dynamically injecting attack parameters if flagged as a security test.
+    """
+    target = payload.get("target") or payload.get("destination_ip") or payload.get("domain") or "collector.internal"
+    traffic_type = payload.get("traffic_type") or payload.get("type") or "normal"
+    is_attack = payload.get("is_attack") or payload.get("attack", False)
+    port = payload.get("port") or payload.get("destination_port")
+    source_ip = payload.get("source_ip")
+    
+    flow_record = generate_behavioral_flow(
+        target_host_or_ip=target,
+        source_ip=source_ip,
+        traffic_type=traffic_type,
+        is_attack=is_attack,
+        destination_port=port,
+    )
+    return flow_record
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
