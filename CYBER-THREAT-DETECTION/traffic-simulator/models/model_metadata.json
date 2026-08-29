@@ -10,12 +10,15 @@
     "iat_mean",
     "iat_std",
     "syn_count",
-    "ack_count"
+    "ack_count",
+    "syn_ratio",
+    "ack_ratio"
   ],
   "class_labels": {
     "0": "Normal",
     "1": "SYN_Flood",
     "2": "Port_Scan",
     "3": "UDP_Flood"
-  }
+  },
+  "classifier_type": "XGBoost"
 }

@@ -238,7 +238,7 @@ class ThreatDetectionEngine:
             n_estimators=100,
             contamination=0.20,
             random_state=random_state,
-            n_jobs=-1,
+            n_jobs=1,
         )
         self.anomaly_model.fit(X_train_scaled)
 
@@ -253,6 +253,7 @@ class ThreatDetectionEngine:
                 num_class=len(CLASS_LABELS),
                 random_state=random_state,
                 eval_metric="mlogloss",
+                n_jobs=1,
             )
         else:
             logger.info("Training Multi-Class Random Forest Threat Classifier...")
@@ -260,7 +261,7 @@ class ThreatDetectionEngine:
                 n_estimators=120,
                 max_depth=12,
                 random_state=random_state,
-                n_jobs=-1,
+                n_jobs=1,
             )
 
         self.classifier_model.fit(X_train_scaled, y_train)

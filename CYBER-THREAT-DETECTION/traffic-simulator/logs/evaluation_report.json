@@ -1,6 +1,7 @@
 {
-  "evaluation_timestamp": "2026-08-29T09:35:28.357943+00:00",
-  "total_evaluated_flows": 500,
+  "evaluation_timestamp": "2026-08-29T10:08:29.445546+00:00",
+  "total_evaluated_flows": 600,
+  "scenario_count": 6,
   "metrics": {
     "overall_accuracy": 1.0,
     "weighted_precision": 1.0,
@@ -9,16 +10,24 @@
     "false_positive_rate": 0.0
   },
   "confusion_matrix": {
-    "true_negatives": 100,
+    "true_negatives": 200,
     "false_positives": 0,
     "false_negatives": 0,
     "true_positives": 400
   },
   "performance_latency": {
-    "mean_latency_ms": 86.031,
-    "p95_latency_ms": 107.154,
-    "p99_latency_ms": 121.713,
-    "throughput_flows_per_sec": 11.6
+    "mean_latency_ms": 17.007,
+    "p95_latency_ms": 22.792,
+    "p99_latency_ms": 28.719,
+    "throughput_flows_per_sec": 57.9
+  },
+  "scenario_accuracy": {
+    "Normal_TCP_Web": "100.0% (100/100)",
+    "Normal_App_Traffic": "100.0% (100/100)",
+    "High_Packet_Rate_Anomaly": "100.0% (100/100)",
+    "TCP_SYN_Flood": "100.0% (100/100)",
+    "Port_Scan_Recon": "100.0% (100/100)",
+    "Spoofed_Tor_Anomaly": "100.0% (100/100)"
   },
   "forensic_audit": {
     "audit_records_logged": 400,
@@ -30,7 +39,7 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 100.0
+      "support": 200.0
     },
     "Port_Scan": {
       "precision": 1.0,
@@ -55,13 +64,13 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 500.0
+      "support": 600.0
     },
     "weighted avg": {
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 500.0
+      "support": 600.0
     }
   }
 }

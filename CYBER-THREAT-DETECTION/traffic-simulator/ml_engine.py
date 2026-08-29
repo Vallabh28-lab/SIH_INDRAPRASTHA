@@ -173,7 +173,7 @@ class ThreatDetectionEngine:
             n_estimators=100,
             contamination=0.20,
             random_state=random_state,
-            n_jobs=-1,
+            n_jobs=1,
         )
         self.anomaly_model.fit(X_train_scaled)
 
@@ -182,7 +182,7 @@ class ThreatDetectionEngine:
             n_estimators=100,
             max_depth=10,
             random_state=random_state,
-            n_jobs=-1,
+            n_jobs=1,
         )
         self.classifier_model.fit(X_train_scaled, y_train)
 
