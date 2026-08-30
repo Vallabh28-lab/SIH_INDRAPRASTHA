@@ -6,18 +6,25 @@ export default function EtlButton() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg]         = useState<{ text: string; ok: boolean } | null>(null);
 
+  // Uses Railway ETL service when NEXT_PUBLIC_ETL_URL is set, falls back to local proxy
+  const ETL_URL = process.env.NEXT_PUBLIC_ETL_URL
+    ? `${process.env.NEXT_PUBLIC_ETL_URL}/run`
+    : "/api/trigger-etl";
+
   const run = async () => {
     setLoading(true);
     setMsg(null);
     try {
-      const res    = await fetch("/api/trigger-etl", { method: "POST" });
+      const res    = await fetch(ETL_URL, { method: "POST" });
       const result = await res.json();
-      setMsg({ text: result.message, ok: result.status === "success" });
-      if (result.status === "success") {
-        setTimeout(() => window.location.reload(), 1200);
-      }
+      // Normalise response shape between Railway /run and local /api/trigger-etl
+      const ok      = result.status === "success";
+      const message = result.message
+        ?? `Processed ${result.records_processed} records · ${result.l7_threats_detected} L7 threats`;
+      setMsg({ text: message, ok });
+      if (ok) setTimeout(() => window.location.reload(), 1200);
     } catch {
-      setMsg({ text: "Failed to reach API.", ok: false });
+      setMsg({ text: "Failed to reach ETL service.", ok: false });
     } finally {
       setLoading(false);
     }
