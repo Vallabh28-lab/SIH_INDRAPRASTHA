@@ -26,8 +26,8 @@ class FlowRecordSchema(BaseModel):
     """
 
     # --- Core 5-Tuple Identifiers ---
-    source_ip: str = Field(
-        ...,
+    source_ip: Optional[str] = Field(
+        default=None,
         description="Source IPv4 address of the flow",
         examples=["192.168.10.10"],
     )
@@ -262,8 +262,10 @@ class FlowRecordSchema(BaseModel):
     # ----------------------------------------------------------------------------------------------
     @field_validator("source_ip", "destination_ip")
     @classmethod
-    def validate_ipv4_address(cls, v: str) -> str:
+    def validate_ipv4_address(cls, v: Optional[str]) -> Optional[str]:
         """Validate that IP address is a syntactically valid IPv4 string."""
+        if v is None:
+            return v
         v_clean = v.strip()
         try:
             ipaddress.IPv4Address(v_clean)

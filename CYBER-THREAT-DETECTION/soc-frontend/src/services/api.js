@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 export const apiClient = {
   async getMetrics() {
@@ -24,7 +24,7 @@ export const apiClient = {
  */
 export const fetchDashboardData = async (limit = 100) => {
   try {
-    const response = await axios.get(`http://localhost:8000/api/traffic?limit=${limit}`);
+    const response = await axios.get(`${API_BASE_URL}/traffic?limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error);
@@ -37,7 +37,7 @@ export const fetchDashboardData = async (limit = 100) => {
  */
 export const fetchAuditLogs = async (limit = 100) => {
   try {
-    const response = await axios.get(`http://localhost:8000/api/audit?limit=${limit}`);
+    const response = await axios.get(`${API_BASE_URL}/audit?limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch audit logs:', error);
@@ -50,7 +50,7 @@ export const fetchAuditLogs = async (limit = 100) => {
  */
 export const verifyAuditIntegrity = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/audit/verify');
+    const response = await axios.get(`${API_BASE_URL}/audit/verify`);
     return response.data;
   } catch (error) {
     console.error('Failed to verify audit integrity:', error);
@@ -63,7 +63,7 @@ export const verifyAuditIntegrity = async () => {
  */
 export const simulateTraffic = async (attackType) => {
   try {
-    const response = await axios.post(`http://localhost:8000/api/traffic/simulate?attack_type=${attackType}`);
+    const response = await axios.post(`${API_BASE_URL}/traffic/simulate?attack_type=${attackType}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to simulate ${attackType}:`, error);

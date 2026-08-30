@@ -235,8 +235,8 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
         xai_explanations = threat_explainer.explain_prediction(flow_data)
 
         # 3. Threat Intelligence Enrichment
-        source_intel = intel_service.enrich_ip(flow_data["source_ip"])
-        dest_intel = intel_service.enrich_ip(flow_data["destination_ip"])
+        source_intel = intel_service.enrich_ip(flow_data["source_ip"]) if flow_data.get("source_ip") else {}
+        dest_intel = intel_service.enrich_ip(flow_data["destination_ip"]) if flow_data.get("destination_ip") else {}
         combined_intel = {
             "source_ip": source_intel,
             "destination_ip": dest_intel,
