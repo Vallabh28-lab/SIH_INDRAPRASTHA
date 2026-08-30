@@ -100,13 +100,13 @@ class FlowRecordSchema(BaseModel):
         examples=[2.951],
     )
     packets_per_second: float = Field(
-        ...,
+        default=0.0,
         ge=0.0,
         description="Packet throughput rate in packets per second",
         examples=[33.88],
     )
     bytes_per_second: float = Field(
-        ...,
+        default=0.0,
         ge=0.0,
         description="Bandwidth throughput in bytes per second",
         examples=[13012.5],
@@ -146,7 +146,7 @@ class FlowRecordSchema(BaseModel):
 
     # --- Inter-Arrival Time (IAT) Metrics ---
     iat_mean: float = Field(
-        ...,
+        default=0.0,
         ge=0.0,
         description="Mean inter-arrival time in seconds",
         examples=[0.0298],
@@ -172,7 +172,7 @@ class FlowRecordSchema(BaseModel):
 
     # --- TCP Flag Counts & Ratio Metrics ---
     syn_count: int = Field(
-        ...,
+        default=0,
         ge=0,
         description="Total packets with SYN flag",
         examples=[1],
@@ -184,7 +184,7 @@ class FlowRecordSchema(BaseModel):
         examples=[1],
     )
     ack_count: int = Field(
-        ...,
+        default=0,
         ge=0,
         description="Total packets with ACK flag",
         examples=[99],
@@ -238,6 +238,23 @@ class FlowRecordSchema(BaseModel):
         ge=0.0,
         description="Ratio of forward to backward packet counts",
         examples=[1.5],
+    )
+
+    # --- Optional Layer 7 HTTP Inspection Fields ---
+    uri_path: Optional[str] = Field(
+        default=None,
+        description="HTTP URI/path for L7 signature inspection",
+        examples=["/search?q=test"],
+    )
+    body_payload: Optional[str] = Field(
+        default=None,
+        description="Raw HTTP request body for L7 signature inspection",
+        examples=["username=admin&password=pass"],
+    )
+    http_headers: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="HTTP request headers for L7 signature inspection",
+        examples=[{"User-Agent": "Mozilla/5.0"}],
     )
 
     # ----------------------------------------------------------------------------------------------

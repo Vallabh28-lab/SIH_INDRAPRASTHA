@@ -21,6 +21,8 @@ from sklearn.metrics import classification_report, confusion_matrix, f1_score, p
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Attempt XGBoost import with graceful fallback to RandomForestClassifier
 try:
     import xgboost as xgb
@@ -66,8 +68,8 @@ class ThreatDetectionEngine:
     2. Supervised Multi-Class Threat Classification (XGBoost / Random Forest) -> ("Normal", "SYN_Flood", "Port_Scan", "UDP_Flood")
     """
 
-    def __init__(self, model_dir: str = "models", use_xgboost: bool = True):
-        self.model_dir = model_dir
+    def __init__(self, model_dir: str = "", use_xgboost: bool = True):
+        self.model_dir = model_dir or os.path.join(BASE_DIR, "models")
         self.use_xgboost = use_xgboost and XGBOOST_AVAILABLE
         self.scaler: Optional[StandardScaler] = None
         self.anomaly_model: Optional[IsolationForest] = None
@@ -122,14 +124,10 @@ class ThreatDetectionEngine:
         pps = float(raw.get("packets_per_second", raw.get("packets_per_sec", 0.0)))
         if pps == 0.0 and duration > 0:
             pps = packet_count / duration
-        elif pps == 0.0 and packet_count > 0:
-            pps = packet_count
 
         bps = float(raw.get("bytes_per_second", raw.get("bytes_per_sec", 0.0)))
         if bps == 0.0 and duration > 0:
             bps = total_bytes / duration
-        elif bps == 0.0 and total_bytes > 0:
-            bps = total_bytes
 
         # Packet size statistics
         mean_pkt_size = float(raw.get("mean_packet_size", 0.0))
@@ -303,21 +301,22 @@ class ThreatDetectionEngine:
         """Synthesize balanced telemetry dataset for bootstrap training."""
         records = []
         # Class 0: Normal
-        for _ in range(150):
+        for _ in range(250):
+            pkts = np.random.randint(10, 500)
             records.append({
-                "packet_count": np.random.randint(10, 80),
-                "total_bytes": np.random.randint(2000, 50000),
-                "flow_duration": np.random.uniform(1.0, 15.0),
-                "packets_per_sec": np.random.uniform(2.0, 25.0),
-                "bytes_per_sec": np.random.uniform(500.0, 15000.0),
-                "mean_packet_size": np.random.uniform(200.0, 900.0),
-                "std_packet_size": np.random.uniform(50.0, 300.0),
-                "iat_mean": np.random.uniform(0.05, 0.5),
-                "iat_std": np.random.uniform(0.01, 0.1),
-                "syn_count": np.random.randint(1, 3),
-                "ack_count": np.random.randint(8, 70),
-                "syn_ratio": 0.05,
-                "ack_ratio": 0.90,
+                "packet_count": pkts,
+                "total_bytes": np.random.randint(1000, 200000),
+                "flow_duration": np.random.uniform(0.0, 20.0),
+                "packets_per_sec": np.random.uniform(0.0, 50.0),
+                "bytes_per_sec": np.random.uniform(0.0, 20000.0),
+                "mean_packet_size": np.random.uniform(100.0, 1400.0),
+                "std_packet_size": np.random.uniform(0.0, 400.0),
+                "iat_mean": np.random.uniform(0.0, 1.0),
+                "iat_std": np.random.uniform(0.0, 0.2),
+                "syn_count": np.random.randint(0, 5),
+                "ack_count": np.random.randint(0, pkts),
+                "syn_ratio": np.random.uniform(0.0, 0.1),
+                "ack_ratio": np.random.uniform(0.5, 1.0),
                 "label": 0,
                 "label_name": "Normal",
             })
@@ -446,6 +445,8 @@ class ThreatDetectionEngine:
         # Heuristic calibration for high-rate signatures
         syn_count = float(raw.get("syn_count", 0))
         ack_count = float(raw.get("ack_count", 0))
+        packet_count = float(raw.get("packet_count", 1))
+        flow_duration = float(raw.get("flow_duration", 0.0))
         protocol = str(raw.get("protocol", "TCP")).upper()
 
         if protocol == "TCP" and syn_count >= 100 and ack_count == 0:
@@ -456,8 +457,15 @@ class ThreatDetectionEngine:
             prediction_label = "UDP_Flood"
             confidence = max(confidence, 0.95)
             anomaly_score = max(anomaly_score, 0.80)
+        elif prediction_label == "Port_Scan" and not (packet_count <= 5 and flow_duration < 0.1):
+            # Port_Scan requires: tiny packet count (<=5) AND near-zero duration (<0.1s).
+            # Any flow with more packets or unknown duration is a false positive — revert to Normal.
+            normal_prob = float(probabilities[0]) if len(probabilities) > 0 else 0.5
+            prediction_label = "Normal"
+            confidence = max(normal_prob, 0.80)
+            anomaly_score = min(anomaly_score, 0.35)
 
-        is_malicious = (prediction_label != "Normal") or (anomaly_score >= 0.65)
+        is_malicious = prediction_label != "Normal"
 
         src_ip = raw.get("source_ip", raw.get("src_ip", "0.0.0.0"))
         dst_ip = raw.get("destination_ip", raw.get("dst_ip", "0.0.0.0"))

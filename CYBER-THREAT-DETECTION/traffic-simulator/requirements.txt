@@ -1,11 +1,19 @@
-scapy>=2.5.0
-fastapi>=0.100.0
-uvicorn>=0.22.0
-pydantic>=2.0
-requests>=2.31.0
-pandas>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-joblib>=1.3.0
-xgboost>=2.0.0
-shap>=0.44.0
+fastapi==0.136.3
+uvicorn==0.47.0
+pydantic==2.12.5
+starlette==1.1.0
+
+pandas==2.3.1
+numpy==2.3.2
+scikit-learn==1.9.0
+joblib==1.5.3
+xgboost==3.4.1
+shap==0.52.0
+
+requests==2.32.5
+pymongo==4.15.5
+python-multipart==0.0.29
+
+# scapy is only needed for live packet capture (packet_generator.py, packet_capture.py)
+# It requires libpcap which is not available on Railway — import is guarded in code
+scapy==2.7.0

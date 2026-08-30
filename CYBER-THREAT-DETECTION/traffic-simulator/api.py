@@ -17,6 +17,8 @@ import threading
 import uuid
 from typing import Any, Dict, List, Optional
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,6 +45,7 @@ from xai_explainer import ThreatExplainer
 from http_input_parser import parse_http_input, parse_http_target_details
 from dns_resolver import resolve_domain, resolve_domain_details
 from behavioral_flow_aggregator import generate_behavioral_flow
+from l7_inspector import inspect_http_payload
 
 
 
@@ -91,10 +94,10 @@ except Exception as exc:
     threat_explainer = ThreatExplainer()
 
 intel_service = ThreatIntelService()
-audit_manager = ForensicAuditManager("logs/audit_trail.json")
-FLOWS_LOG_FILE = "logs/flows.jsonl"
+audit_manager = ForensicAuditManager(os.path.join(BASE_DIR, "logs", "audit_trail.json"))
+FLOWS_LOG_FILE = os.path.join(BASE_DIR, "logs", "flows.jsonl")
 flows_file_lock = threading.Lock()
-os.makedirs(os.path.dirname(os.path.abspath(FLOWS_LOG_FILE)), exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, "logs"), exist_ok=True)
 
 
 def _append_to_flows_store(record: Dict[str, Any]) -> None:
@@ -239,6 +242,19 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
             "destination_ip": dest_intel,
         }
 
+        # 3b. Layer 7 HTTP Payload Inspection
+        l7_analysis = None
+        if flow_data.get("uri_path") or flow_data.get("body_payload") or flow_data.get("http_headers"):
+            l7_analysis = inspect_http_payload(
+                uri_path=flow_data.get("uri_path") or "",
+                body_payload=flow_data.get("body_payload") or "",
+                headers=flow_data.get("http_headers") or {},
+            )
+            if l7_analysis["is_l7_malicious"]:
+                is_malicious = True
+                if prediction_label == "Normal":
+                    prediction_label = l7_analysis["l7_threat_type"] or "L7_Attack"
+
         # 4. Forensic SHA-256 Audit Trail Logging (For Malicious Events)
         audit_record = None
         audit_hash = None
@@ -276,6 +292,7 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
             "total_bytes": flow_data["total_bytes"],
             "xai_explanations": xai_explanations,
             "threat_intel": combined_intel,
+            "l7_analysis": l7_analysis,
             "audit_hash": audit_hash,
             "audit_id": audit_id,
             "received_flow": flow_data,
@@ -293,11 +310,13 @@ def receive_flow_telemetry(flow: FlowRecordSchema):
             "status": "success",
             "message": "Flow record processed, persisted to flows.jsonl, and audited successfully",
             "prediction": prediction_label,
+            "prediction_label": prediction_label,
             "confidence": confidence,
             "anomaly_score": anomaly_score,
             "is_malicious": is_malicious,
             "xai_explanations": xai_explanations,
             "threat_intel": combined_intel,
+            "l7_analysis": l7_analysis,
             "audit_hash": audit_hash,
             "audit_id": audit_id,
             "received_flow": flow_data,
@@ -370,11 +389,11 @@ def get_forensic_audit_logs(limit: int = Query(default=100, ge=1, le=500)):
 @app.get("/api/metrics", status_code=status.HTTP_200_OK, tags=["SOC Dashboard"])
 def get_soc_metrics():
     """Returns top-level metric counters for the SOC dashboard."""
-    alerts_file = "logs/alerts.json"
+    alerts_file = os.path.join(BASE_DIR, "logs", "alerts.json")
     total_flows = len(traffic_history) if traffic_history else 12450
     threats_detected = sum(1 for e in traffic_history if e.get("is_malicious"))
     high_risk = sum(1 for e in traffic_history if e.get("anomaly_score", 0) > 0.70 or (e.get("confidence", 0) > 0.90 and e.get("is_malicious")))
-    
+
     if os.path.exists(alerts_file):
         try:
             with open(alerts_file, "r", encoding="utf-8") as f:
@@ -396,7 +415,7 @@ def get_soc_metrics():
 @app.get("/api/incidents", status_code=status.HTTP_200_OK, tags=["SOC Dashboard"])
 def get_live_incidents():
     """Returns recent threat incidents and forensic audit logs."""
-    alerts_file = "logs/alerts.json"
+    alerts_file = os.path.join(BASE_DIR, "logs", "alerts.json")
     if os.path.exists(alerts_file):
         try:
             with open(alerts_file, "r", encoding="utf-8") as f:
@@ -414,6 +433,83 @@ def get_live_incidents():
 def verify_audit_integrity():
     """Validates full end-to-end cryptographic hash-chain integrity of audit records."""
     return audit_manager.verify_integrity()
+
+
+@app.post("/api/trigger-etl", status_code=status.HTTP_200_OK, tags=["ETL Intelligence"])
+def trigger_etl_pipeline():
+    """
+    Runs ETL Extract + Transform against data/traffic_logs.json and appends
+    enriched records to logs/etl_output.jsonl. Skips MongoDB.
+    """
+    import json as _json
+    from etl_pipeline import extract, transform
+
+    etl_file = os.path.join(BASE_DIR, "logs", "etl_output.jsonl")
+    source   = os.path.join(BASE_DIR, "data", "traffic_logs.json")
+    try:
+        enriched_df = transform(extract(source))
+        os.makedirs(os.path.join(BASE_DIR, "logs"), exist_ok=True)
+        written = 0
+        with open(etl_file, "a", encoding="utf-8") as f:
+            for record in enriched_df.to_dict(orient="records"):
+                cleaned = {}
+                for k, v in record.items():
+                    if v is None:
+                        cleaned[k] = None
+                    elif hasattr(v, "isoformat"):
+                        cleaned[k] = v.isoformat()
+                    elif isinstance(v, float) and (v != v):
+                        cleaned[k] = None
+                    else:
+                        cleaned[k] = v
+                f.write(_json.dumps(cleaned) + "\n")
+                written += 1
+        logger.info("[ETL TRIGGER] Appended %d records to %s", written, etl_file)
+        return {
+            "status": "success",
+            "message": f"ETL Pipeline executed! Processed {written} records from traffic_logs.json.",
+            "records_written": written,
+        }
+    except Exception as exc:
+        logger.error("[ETL TRIGGER] Failed: %s", exc, exc_info=True)
+        return {"status": "error", "message": str(exc)}
+
+
+@app.get("/api/logs", status_code=status.HTTP_200_OK, tags=["ETL Intelligence"])
+def get_etl_logs(
+    limit: int = Query(default=50, ge=1, le=500),
+    malicious_only: bool = Query(default=False),
+):
+    """
+    Returns enriched ETL-processed flow records from logs/etl_output.jsonl.
+    Consumed by the Next.js Threat Intelligence Dashboard.
+    Supports optional filtering to return only L7-malicious records.
+    """
+    etl_file = os.path.join(BASE_DIR, "logs", "etl_output.jsonl")
+    records: List[Dict[str, Any]] = []
+
+    if os.path.exists(etl_file):
+        try:
+            with open(etl_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        records.append(json.loads(line))
+        except Exception as exc:
+            logger.error("[ETL LOGS] Failed to read %s: %s", etl_file, exc)
+
+    if malicious_only:
+        records = [r for r in records if r.get("is_l7_malicious")]
+
+    total = len(records)
+    malicious_count = sum(1 for r in records if r.get("is_l7_malicious"))
+    paged = records[-limit:]  # return most recent N
+
+    return {
+        "total_records": total,
+        "malicious_count": malicious_count,
+        "logs": paged,
+    }
 
 
 @app.post("/api/traffic/simulate", status_code=status.HTTP_200_OK, tags=["SOC Simulator Control"])
@@ -676,7 +772,8 @@ def generate_behavioral_flow_endpoint(payload: Dict[str, Any]):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 

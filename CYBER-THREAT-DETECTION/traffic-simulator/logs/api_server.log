@@ -1,0 +1,24 @@
+WARNING: No libpcap provider available ! pcap won't be used
+2026-08-30 03:11:50 [INFO] [ThreatDetectionEngine] ThreatDetectionEngine auto-loaded models from 'models'
+2026-08-30 03:11:50 [INFO] [TrafficGatewayAPI] ThreatDetectionEngine initialized successfully.
+2026-08-30 03:11:50 [INFO] [ThreatExplainer] Initialized shap.TreeExplainer for Multi-Class Threat Classifier.
+2026-08-30 03:11:50 [INFO] [TrafficGatewayAPI] ThreatExplainer initialized successfully.
+2026-08-30 03:11:50 [INFO] [ForensicAuditManager] Loaded 18 audit records from 'logs/audit_trail.json'
+INFO:     Started server process [255236]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-08-30 03:11:51 [INFO] [TrafficGatewayAPI] [INGEST] Flow record from 192.168.10.55 -> 192.168.10.20 (TCP) | pkts: 30, bytes: 9600
+2026-08-30 03:11:51 [INFO] [ForensicAuditManager] [FORENSIC AUDIT] Logged Threat [AUD-9448E7195933] SQL_Injection | Source: 192.168.10.55 -> 192.168.10.20 | SHA256: 14333e7e55660a20...
+INFO:     127.0.0.1:52957 - "POST /api/traffic HTTP/1.1" 201 Created
+2026-08-30 03:11:53 [INFO] [TrafficGatewayAPI] [INGEST] Flow record from 192.168.10.55 -> 192.168.10.20 (TCP) | pkts: 30, bytes: 9600
+2026-08-30 03:11:53 [INFO] [ForensicAuditManager] [FORENSIC AUDIT] Logged Threat [AUD-FAA11FFC2376] XSS | Source: 192.168.10.55 -> 192.168.10.20 | SHA256: a213b4b6d4d242a3...
+INFO:     127.0.0.1:62434 - "POST /api/traffic HTTP/1.1" 201 Created
+2026-08-30 03:11:55 [INFO] [TrafficGatewayAPI] [INGEST] Flow record from 192.168.10.55 -> 192.168.10.20 (TCP) | pkts: 30, bytes: 9600
+2026-08-30 03:11:55 [INFO] [ForensicAuditManager] [FORENSIC AUDIT] Logged Threat [AUD-5AAB25F57F75] Path_Traversal | Source: 192.168.10.55 -> 192.168.10.20 | SHA256: adead85a80aafc3d...
+INFO:     127.0.0.1:57984 - "POST /api/traffic HTTP/1.1" 201 Created
+2026-08-30 03:11:57 [INFO] [TrafficGatewayAPI] [INGEST] Flow record from 192.168.10.55 -> 192.168.10.20 (TCP) | pkts: 30, bytes: 9600
+2026-08-30 03:11:57 [INFO] [ForensicAuditManager] [FORENSIC AUDIT] Logged Threat [AUD-B993AD24B36C] SQL_Injection | Source: 192.168.10.55 -> 192.168.10.20 | SHA256: ba7dd5a5ca73481c...
+INFO:     127.0.0.1:57986 - "POST /api/traffic HTTP/1.1" 201 Created
+2026-08-30 03:11:59 [INFO] [TrafficGatewayAPI] [INGEST] Flow record from 192.168.10.55 -> 192.168.10.20 (TCP) | pkts: 30, bytes: 9600
+INFO:     127.0.0.1:57867 - "POST /api/traffic HTTP/1.1" 201 Created

@@ -1,0 +1,85 @@
+[
+  {
+    "src_ip": "192.168.10.10", "dst_ip": "192.168.10.20",
+    "src_port": 54321, "dst_port": 80, "protocol": "TCP",
+    "packet_count": 26, "total_bytes": 15723,
+    "packets_per_sec": 42.91, "bytes_per_sec": 25951.55,
+    "iat_mean": 0.024234, "syn_count": 1, "ack_count": 25,
+    "flow_duration": 0.606, "label_name": "Normal",
+    "uri_path": "/index.html",
+    "body_payload": null,
+    "http_headers": {"User-Agent": "Mozilla/5.0", "Accept": "text/html"}
+  },
+  {
+    "src_ip": "10.0.4.88", "dst_ip": "192.168.10.20",
+    "src_port": 49152, "dst_port": 80, "protocol": "TCP",
+    "packet_count": 550, "total_bytes": 35200,
+    "packets_per_sec": 846.15, "bytes_per_sec": 54153.84,
+    "iat_mean": 0.0011, "syn_count": 550, "ack_count": 0,
+    "flow_duration": 0.65, "label_name": "SYN_Flood",
+    "uri_path": null, "body_payload": null, "http_headers": null
+  },
+  {
+    "src_ip": "172.16.5.99", "dst_ip": "192.168.10.20",
+    "src_port": 59100, "dst_port": 22, "protocol": "TCP",
+    "packet_count": 1, "total_bytes": 60,
+    "packets_per_sec": 10000.0, "bytes_per_sec": 600000.0,
+    "iat_mean": 0.0, "syn_count": 1, "ack_count": 0,
+    "flow_duration": 0.0, "label_name": "Port_Scan",
+    "uri_path": "/admin/login?user=admin' OR 1=1 --",
+    "body_payload": null,
+    "http_headers": {"User-Agent": "sqlmap/1.7"}
+  },
+  {
+    "src_ip": "203.0.113.45", "dst_ip": "192.168.10.20",
+    "src_port": 44550, "dst_port": 8080, "protocol": "TCP",
+    "packet_count": 12, "total_bytes": 4800,
+    "packets_per_sec": 8.0, "bytes_per_sec": 3200.0,
+    "iat_mean": 0.125, "syn_count": 1, "ack_count": 11,
+    "flow_duration": 1.5, "label_name": "Normal",
+    "uri_path": "/search",
+    "body_payload": "q=<script>alert(document.cookie)</script>",
+    "http_headers": {"Content-Type": "application/x-www-form-urlencoded"}
+  },
+  {
+    "src_ip": "198.51.100.77", "dst_ip": "192.168.10.20",
+    "src_port": 33100, "dst_port": 443, "protocol": "TCP",
+    "packet_count": 8, "total_bytes": 2400,
+    "packets_per_sec": 5.3, "bytes_per_sec": 1600.0,
+    "iat_mean": 0.19, "syn_count": 1, "ack_count": 7,
+    "flow_duration": 1.5, "label_name": "Normal",
+    "uri_path": "/files/download",
+    "body_payload": "filename=../../../../etc/passwd",
+    "http_headers": {"X-Forwarded-For": "127.0.0.1"}
+  },
+  {
+    "src_ip": "10.0.55.200", "dst_ip": "192.168.10.20",
+    "src_port": 51000, "dst_port": 80, "protocol": "TCP",
+    "packet_count": 18, "total_bytes": 7200,
+    "packets_per_sec": 12.0, "bytes_per_sec": 4800.0,
+    "iat_mean": 0.083, "syn_count": 1, "ack_count": 17,
+    "flow_duration": 1.5, "label_name": "Normal",
+    "uri_path": "/api/users?id=1 UNION SELECT username,password FROM users",
+    "body_payload": "<img src=x onerror=alert(1)>",
+    "http_headers": {"User-Agent": "curl/7.88", "Content-Type": "application/json"}
+  },
+  {
+    "src_ip":   null,
+    "dst_ip":   "192.168.10.20",
+    "src_port": 12345, "dst_port": 80, "protocol": "TCP",
+    "packet_count": 10, "total_bytes": 600,
+    "packets_per_sec": 5.0, "bytes_per_sec": 300.0,
+    "iat_mean": 0.2, "syn_count": 1, "ack_count": 9,
+    "flow_duration": 2.0, "label_name": "Normal",
+    "uri_path": "/health", "body_payload": null, "http_headers": null
+  },
+  {
+    "src_ip": "192.168.10.20", "dst_ip": "198.51.100.62",
+    "src_port": 123, "dst_port": 27565, "protocol": "UDP",
+    "packet_count": 314, "total_bytes": 328106,
+    "packets_per_sec": 284.5, "bytes_per_sec": 297280.32,
+    "iat_mean": 0.003526, "syn_count": 0, "ack_count": 0,
+    "flow_duration": 1.103692, "label_name": "UDP_Flood",
+    "uri_path": null, "body_payload": null, "http_headers": null
+  }
+]

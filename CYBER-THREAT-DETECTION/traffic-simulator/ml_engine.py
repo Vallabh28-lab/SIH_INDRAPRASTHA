@@ -96,14 +96,10 @@ class ThreatDetectionEngine:
         pps = float(raw.get("packets_per_second", raw.get("packets_per_sec", 0.0)))
         if pps == 0.0 and duration > 0:
             pps = packet_count / duration
-        elif pps == 0.0 and packet_count > 0:
-            pps = packet_count
 
         bps = float(raw.get("bytes_per_second", raw.get("bytes_per_sec", 0.0)))
         if bps == 0.0 and duration > 0:
             bps = total_bytes / duration
-        elif bps == 0.0 and total_bytes > 0:
-            bps = total_bytes
 
         mean_pkt_size = float(raw.get("mean_packet_size", 0.0))
         if mean_pkt_size == 0.0 and packet_count > 0:
@@ -245,7 +241,7 @@ class ThreatDetectionEngine:
                 pred = "UDP_Flood"
                 conf = 0.90
                 anom = 0.80
-            elif pps > 100:
+            elif pps > 500 and float(raw.get("packet_count", 1)) <= 3:
                 pred = "Port_Scan"
                 conf = 0.88
                 anom = 0.75
@@ -271,7 +267,7 @@ class ThreatDetectionEngine:
         raw_score = self.anomaly_model.score_samples(scaled_feat)[0]
         anomaly_score = float(np.clip(0.5 - raw_score, 0.0, 1.0))
 
-        is_malicious = prediction_label != "Normal" or anomaly_score > 0.65
+        is_malicious = prediction_label != "Normal" or anomaly_score > 0.75
 
         return {
             "prediction": prediction_label,
